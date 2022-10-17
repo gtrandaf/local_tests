@@ -1,0 +1,52 @@
+---
+name: Deploy TG Test Resuable
+on: 
+  workflow_call:
+    inputs:
+      prRef:
+        description: The git ref to checkout
+        type: string
+        required: false
+      prHeadSha:
+        description: >-
+          For PR builds where GITHUB_REF isn't set to the PR (e.g. comment trigger),
+          pass the PR's head SHA commit here
+        type: string
+        required: false
+      ciGitRef:
+        description: The git ref to use in annotations to associate a deployment with the code that triggered it
+        type: string
+        required: true
+      e2eTestsCustomSelector:
+        description: The pytest marker selector for the e2e tests to be run
+        type: string
+        default: ""
+        required: false
+      environmentName:
+        description: The name of the Github Action's environment this will deploy into
+        type: string
+        required: true
+
+concurrency: "deploy-${{ inputs.ciGitRef }}"
+########################################################################################
+### START ###
+jobs:
+  start_test_george:
+    name: Start Test George
+    runs-on: self-hosted
+    environment: ${{ inputs.environmentName }}
+    steps:
+      # - name: Show inputs
+      #   run: |
+      #     echo "Inputs"
+      #     echo "======"
+      #     echo "prRef       : ${{ inputs.prRef }}"
+      #     echo "prRHeadSha  : ${{ inputs.prHeadSha }}"
+      #     echo "ciGitRef    : ${{ inputs.ciGitRef }}"
+      #     echo "environment : ${{ inputs.environmentName }}"
+          
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.prRef }}
